@@ -71,6 +71,38 @@ sub initArgs {
     }
 }
 
+sub getSnapshot {
+    my ($self, %options) = @_;
+    
+    # 2012-09-21T14:16:17.540469Z
+    my $create_time = Date::Parse::str2time($options{snapshot}->createTime);
+    if (!defined($create_time)) {
+        $self->{manager}->{output}->output_add(severity => 'UNKNOWN',
+                                                short_msg => "Can't Parse date '" . $options{snapshot}->createTime . "' for vm '" . $options{entity}->{name} . "'");
+        return;
+    }
+    
+    my $diff_time = time() - $create_time;
+    my $days = int($diff_time / 60 / 60 / 24);
+    my $exit = $self->{manager}->{perfdata}->threshold_check(value => $diff_time, threshold => [ { label => 'critical', exit_litteral => 'critical' }, { label => 'warning', exit_litteral => 'warning' } ]);
+    
+    my $prefix_msg = "VM '$options{entity}->{name}'";
+    if (defined($self->{display_description}) && defined($options{entity}->{'config.annotation'}) &&
+        $options{entity}->{'config.annotation'} ne '') {
+        $prefix_msg .= ' [' . centreon::vmware::common::strip_cr(value => $options{entity}->{'config.annotation'}) . ']';
+    }
+    if (!$self->{manager}->{output}->is_status(value => $exit, compare => 'ok', litteral => 1)) {
+        $self->{vm_errors}->{$exit}->{$options{entity}->{name}."/".$options{snapshot}->name} = 1;
+        $self->{manager}->{output}->output_add(long_msg => "$prefix_msg snapshot '" . $options{snapshot}->name . "' creation time: " . $options{snapshot}->createTime);
+    }
+
+    return if (!defined($options{snapshot}->{'childSnapshotList'}));
+
+    foreach my $child_snapshot (@{$options{snapshot}->{'childSnapshotList'}}) {
+        $self->getSnapshot(entity => $options{entity}, snapshot => $child_snapshot);
+    }
+}
+
 sub run {
     my $self = shift;
 
@@ -97,8 +129,7 @@ sub run {
     my $result = centreon::vmware::common::search_entities(command => $self, view_type => 'VirtualMachine', properties => \@properties, filter => $filters);
     return if (!defined($result));
 
-    my %vm_consolidate = ();
-    my %vm_errors = (warning => {}, critical => {});    
+    my %vm_consolidate = (); 
     if (scalar(@$result) > 1) {
         $multiple = 1;
     }
@@ -109,7 +140,7 @@ sub run {
         $self->{manager}->{output}->output_add(severity => 'OK',
                                                short_msg => sprintf("Snapshot(s) OK"));
     }
-    foreach my $entity_view (@$result) {
+    foreach my $entity_view (sort { $a->{name} cmp $b->{name} } @$result) {
         next if (centreon::vmware::common::vm_state(connector => $self->{connector},
                                                   hostname => $entity_view->{name}, 
                                                   state => $entity_view->{'runtime.connectionState'}->val,
@@ -127,45 +158,25 @@ sub run {
         next if (!defined($entity_view->{'snapshot.rootSnapshotList'}));
     
         foreach my $snapshot (@{$entity_view->{'snapshot.rootSnapshotList'}}) {
-            # 2012-09-21T14:16:17.540469Z
-            my $create_time = Date::Parse::str2time($snapshot->createTime);
-            if (!defined($create_time)) {
-                $self->{manager}->{output}->output_add(severity => 'UNKNOWN',
-                                                       short_msg => "Can't Parse date '" . $snapshot->createTime . "' for vm '" . $entity_view->{name} . "'");
-                next;
-            }
-            
-            my $diff_time = time() - $create_time;
-            my $days = int($diff_time / 60 / 60 / 24);
-            my $exit = $self->{manager}->{perfdata}->threshold_check(value => $diff_time, threshold => [ { label => 'critical', exit_litteral => 'critical' }, { label => 'warning', exit_litteral => 'warning' } ]);
-            
-            my $prefix_msg = "'$entity_view->{name}'";
-            if (defined($self->{display_description}) && defined($entity_view->{'config.annotation'}) &&
-                $entity_view->{'config.annotation'} ne '') {
-                $prefix_msg .= ' [' . centreon::vmware::common::strip_cr(value => $entity_view->{'config.annotation'}) . ']';
-            }
-            if (!$self->{manager}->{output}->is_status(value => $exit, compare => 'ok', litteral => 1)) {
-                $vm_errors{$exit}->{$entity_view->{name}} = 1;
-                $self->{manager}->{output}->output_add(long_msg => "$prefix_msg snapshot create time: " . $snapshot->createTime);
-            }
+            $self->getSnapshot(entity => $entity_view, snapshot => $snapshot);
         }
     }
 
     $self->{manager}->{output}->perfdata_add(label => 'num_warning',
-                                             value => scalar(keys %{$vm_errors{warning}}),
+                                             value => scalar(keys %{$self->{vm_errors}->{warning}}),
                                              min => 0);
     $self->{manager}->{output}->perfdata_add(label => 'num_critical',
-                                             value => scalar(keys %{$vm_errors{critical}}),
+                                             value => scalar(keys %{$self->{vm_errors}->{critical}}),
                                              min => 0);
-    if (scalar(keys %{$vm_errors{warning}}) > 0) {
+    if (scalar(keys %{$self->{vm_errors}->{warning}}) > 0) {
         $self->{manager}->{output}->output_add(severity => 'WARNING',
                                                short_msg => sprintf('Snapshots for VM older than %d days: [%s]', ($self->{warning} / 86400), 
-                                                                    join('] [', sort keys %{$vm_errors{warning}})));
+                                                                    join('] [', sort keys %{$self->{vm_errors}->{warning}})));
     }
-    if (scalar(keys %{$vm_errors{critical}}) > 0) {
+    if (scalar(keys %{$self->{vm_errors}->{critical}}) > 0) {
         $self->{manager}->{output}->output_add(severity => 'CRITICAL',
                                                short_msg => sprintf('Snapshots for VM older than %d days: [%s]', ($self->{critical} / 86400), 
-                                                                    join('] [', sort keys %{$vm_errors{critical}})));
+                                                                    join('] [', sort keys %{$self->{vm_errors}->{critical}})));
     }
     if (scalar(keys %vm_consolidate) > 0) {
          $self->{manager}->{output}->output_add(severity => 'CRITICAL',
