@@ -246,12 +246,12 @@ sub run {
             my $extra_label = '';
             $extra_label .= '_' . $_ if ($number_nic > 1);
             $extra_label .= '_' . $entity_view->{name} if ($multiple == 1);
-            $self->{manager}->{output}->perfdata_add(label => 'traffic_in' . $extra_label, unit => 'b/s',
+            $self->{manager}->{output}->perfdata_add(label => 'traffic_in' . $extra_label, unit => 'B',
                                           value => sprintf("%.2f", $traffic_in),
                                           warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning-in', total => $interface_speed),
                                           critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical-in', total => $interface_speed),
                                           min => 0, max => $interface_speed);
-            $self->{manager}->{output}->perfdata_add(label => 'traffic_out' . $extra_label, unit => 'b/s',
+            $self->{manager}->{output}->perfdata_add(label => 'traffic_out' . $extra_label, unit => 'B',
                                           value => sprintf("%.2f", $traffic_out),
                                           warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning-out', total => $interface_speed),
                                           critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical-out', total => $interface_speed),

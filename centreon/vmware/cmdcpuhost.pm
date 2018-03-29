@@ -136,7 +136,7 @@ sub run {
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
                                                  min => 0, max => 100);
-        $self->{manager}->{output}->perfdata_add(label => 'cpu_total_MHz' . $extra_label, unit => 'MHz',
+        $self->{manager}->{output}->perfdata_add(label => 'cpu_total_MHz' . $extra_label, unit => '',
                                                  value => $total_cpu_mhz_average,
                                                  min => 0, max => $entity_view->{'summary.hardware.numCpuCores'} * $entity_view->{'summary.hardware.cpuMhz'});
 

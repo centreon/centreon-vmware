@@ -137,12 +137,12 @@ sub run {
         
         my $extra_label = '';
         $extra_label = '_' . $entity_view->{name} if ($multiple == 1);
-        $self->{manager}->{output}->perfdata_add(label => 'swap_in' . $extra_label, unit => 'B/s',
+        $self->{manager}->{output}->perfdata_add(label => 'swap_in' . $extra_label, unit => 'B',
                                                  value => $swap_in,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
                                                  min => 0);
-        $self->{manager}->{output}->perfdata_add(label => 'swap_out' . $extra_label, unit => 'B/s',
+        $self->{manager}->{output}->perfdata_add(label => 'swap_out' . $extra_label, unit => 'B',
                                                  value => $swap_out,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),

@@ -136,12 +136,12 @@ sub run {
         
         my $extra_label = '';
         $extra_label = '_' . $entity_view->{'summary.name'} if ($multiple == 1);
-        $self->{manager}->{output}->perfdata_add(label => 'read_rate' . $extra_label, unit => 'B/s',
+        $self->{manager}->{output}->perfdata_add(label => 'read_rate' . $extra_label, unit => 'B',
                                                  value => $read_counter,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
                                                  min => 0);
-        $self->{manager}->{output}->perfdata_add(label => 'write_rate' . $extra_label, unit => 'B/s',
+        $self->{manager}->{output}->perfdata_add(label => 'write_rate' . $extra_label, unit => 'B',
                                                  value => $write_counter,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),

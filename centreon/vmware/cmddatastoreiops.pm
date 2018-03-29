@@ -229,12 +229,12 @@ sub run {
         
         my $extra_label = '';
         $extra_label = '_' . $_ if ($multiple == 1);
-        $self->{manager}->{output}->perfdata_add(label => 'riops' . $extra_label, unit => 'iops',
+        $self->{manager}->{output}->perfdata_add(label => 'riops' . $extra_label, unit => '',
                                                  value => $total_read_counter,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
                                                  min => 0);
-        $self->{manager}->{output}->perfdata_add(label => 'wiops' . $extra_label, unit => 'iops',
+        $self->{manager}->{output}->perfdata_add(label => 'wiops' . $extra_label, unit => '',
                                                  value => $total_write_counter,
                                                  warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                  critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
