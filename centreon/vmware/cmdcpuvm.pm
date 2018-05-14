@@ -144,7 +144,7 @@ sub run {
         foreach my $entry (({ value => $total_cpu_average, label => 'usage', output => 'Total Average CPU usage %s %%',
                               perf_label => 'cpu_total', perf_min => 0, perf_max => 100, perf_unit => '%' }, 
                             { value => $total_cpu_mhz_average, label => 'usagemhz', output => 'Total Average CPU %s Mhz',
-                              perf_label => 'cpu_total_MHz', perf_min => 0, perf_unit => 'MHz'}, 
+                              perf_label => 'cpu_total_MHz', perf_min => 0, perf_unit => ''}, 
                             { value => $total_cpu_ready, label => 'ready', output => 'CPU ready %s %%',
                               perf_label => 'cpu_ready', perf_min => 0, perf_unit => '%' })) {
             my $exit = $self->{manager}->{perfdata}->threshold_check(value => $entry->{value}, threshold => [ { label => 'critical_' . $entry->{label}, exit_litteral => 'critical' }, { label => 'warning_' . $entry->{label}, exit_litteral => 'warning' } ]);
@@ -191,7 +191,7 @@ sub run {
             my ($counter_id, $instance) = split /:/, $id;
             next if ($self->{connector}->{perfcounter_cache}->{'cpu.usagemhz.average'}->{key} != $counter_id);
             if ($instance ne "") {
-                $self->{manager}->{output}->perfdata_add(label => 'cpu_' . $instance . '_MHz' . $extra_label, unit => 'MHz',
+                $self->{manager}->{output}->perfdata_add(label => 'cpu_' . $instance . '_MHz' . $extra_label, unit => '',
                                                          value => centreon::vmware::common::simplify_number(centreon::vmware::common::convert_number($values->{$entity_value}->{$id})),
                                                          min => 0);
             }

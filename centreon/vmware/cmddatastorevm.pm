@@ -224,12 +224,12 @@ sub run {
                                                    $prefix_msg, $_, $write_counter));
             }
             
-            $self->{manager}->{output}->perfdata_add(label => 'riops' . $extra_label . '_' . $_, unit => 'iops',
+            $self->{manager}->{output}->perfdata_add(label => 'riops' . $extra_label . '_' . $_, unit => '',
                                                      value => $read_counter,
                                                      warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                      critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
                                                      min => 0);
-            $self->{manager}->{output}->perfdata_add(label => 'wiops' . $extra_label . '_' . $_, unit => 'iops',
+            $self->{manager}->{output}->perfdata_add(label => 'wiops' . $extra_label . '_' . $_, unit => '',
                                                      value => $write_counter,
                                                      warning => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'warning'),
                                                      critical => $self->{manager}->{perfdata}->get_perfdata_for_output(label => 'critical'),
