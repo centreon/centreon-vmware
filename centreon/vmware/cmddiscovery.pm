@@ -38,11 +38,6 @@ sub new {
 sub checkArgs {
     my ($self, %options) = @_;
 
-    if (defined($options{arguments}->{esx_hostname}) && $options{arguments}->{esx_hostname} eq "") {
-        $options{manager}->{output}->output_add(severity => 'UNKNOWN',
-                                                short_msg => "Argument error: esx hostname cannot be null");
-        return 1;
-    }
     return 0;
 }
 
