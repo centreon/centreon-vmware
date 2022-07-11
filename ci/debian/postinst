@@ -2,8 +2,12 @@
 
 if [ "$1" = "configure" ] ; then
 
-  mv /lib/systemd/system/centreon_vmware-systemd /lib/systemd/system/centreon_vmware.service
-  mv /etc/centreon/centreon_vmware-conf.pm /etc/centreon/centreon_vmware.pm
+  if [ -e "/lib/systemd/system/centreon_vmware-systemd" ]; then
+    mv /lib/systemd/system/centreon_vmware-systemd /lib/systemd/system/centreon_vmware.service
+  fi
+  if [ -e "/etc/centreon/centreon_vmware-conf.pm" ]; then
+    mv /etc/centreon/centreon_vmware-conf.pm /etc/centreon/centreon_vmware.pm
+  fi
 
   systemctl daemon-reload
   systemctl enable centreon_vmware.service
